@@ -10,11 +10,12 @@ from ...components import db, glacier
 # Based on: http://code.google.com/p/django-backup/
 # Based on: http://www.djangosnippets.org/snippets/823/
 # Based on: http://www.yashh.com/blog/2008/sep/05/django-database-backup-view/
+# set default for outdir as BACKUPS_PATH in settings
 class Command(BaseCommand):
 	option_list = BaseCommand.option_list + (
 		make_option('-o', '--output', default=None, dest='output',
 			help='Write backup to file'),
-		make_option('-d', '--outdir', default=None, dest='outdir',
+		make_option('-d', '--outdir', default=settings.BACKUPS_PATH, dest='outdir',
 			help='Write backup to timestamped file in a directory'),
 		make_option('-g', '--glacier', default=None, dest='glacier',
 			help='Upload backup to the Amazon Glacier vault with the given ARN'),
