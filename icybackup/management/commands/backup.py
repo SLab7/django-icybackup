@@ -70,6 +70,8 @@ class Command(BaseCommand):
 				extras_mf.close()
 				tf.add(extras_mf.name, arcname='backup/extras/manifest')
 				os.unlink(extras_mf.name)
+			member_info = tf.getmember('backup/databases/default')
+			sys.stdout.write('{} bytes'.format(member_info.size))
 
 		# upload to glacier
 		if glacier_vault is not None:
