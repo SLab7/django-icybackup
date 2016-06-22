@@ -19,7 +19,7 @@ class Command(BaseCommand):
 			help='Write backup to timestamped file in a directory'),
 		make_option('-g', '--glacier', default=None, dest='glacier',
 			help='Upload backup to the Amazon Glacier vault with the given ARN'),
-		make_option('-O', '--stdout', action='store_true', dest='stdout',
+		make_option('-O', '--stdoutput', action='store_true', dest='stdoutput',
 			help='Output backup tarball to standard output'),
 		make_option('--extra', '-e', action='append', default=[], dest='extras',
 			help='Include extra directories or files in the backup tarball'),
@@ -32,7 +32,7 @@ class Command(BaseCommand):
 		output_file = options.get('output')
 		output_dir = options.get('outdir')
 		glacier_vault = options.get('glacier')
-		output_to_stdout = options.get('stdout')
+		output_to_stdout = options.get('stdoutput')
 		output_file_temporary = False
 
 		# glacier backups go to a temporary file
@@ -71,7 +71,7 @@ class Command(BaseCommand):
 				tf.add(extras_mf.name, arcname='backup/extras/manifest')
 				os.unlink(extras_mf.name)
 			member_info = tf.getmember('backup/databases/default')
-			sys.stdout.write('{} bytes'.format(member_info.size))
+			self.stdout.write('{} bytes'.format(member_info.size))
 
 		# upload to glacier
 		if glacier_vault is not None:
