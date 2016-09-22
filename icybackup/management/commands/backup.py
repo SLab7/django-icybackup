@@ -60,8 +60,10 @@ class Command(BaseCommand):
 
 		# create backup gzipped tarball
 		with tarfile.open(output_file, 'w:gz') as tf:
-			tf.add(database_root, arcname='backup/databases')
-			tf.add(media_root, arcname='backup/media')
+			if os.path.exists(database_root):
+				tf.add(database_root, arcname='backup/databases')
+			if os.path.exists(media_root):
+				tf.add(media_root, arcname='backup/media')
 			if len(extras) > 0:
 				extras_mf = NamedTemporaryFile(delete=False)
 				for count, extra in enumerate(extras):
