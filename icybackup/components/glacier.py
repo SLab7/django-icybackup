@@ -2,12 +2,16 @@ from .. import models
 from datetime import timedelta, datetime
 from boto.glacier.layer2 import Layer2 as Glacier
 from dateutil.parser import parse
+from django.conf import settings
 from django.core.management import CommandError
 
 # upload to amazon glacier
 
 def _get_vault_from_arn(arn, settings):
-	g = Glacier(aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    if hasattr(settings, 'USING_IAM_ROLE') and settings.USING_IAM_ROLE:
+        g = Glacier()
+    else:
+    	g = Glacier(aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
 	for i in g.list_vaults():
 		if arn == i.arn:
 			return i
@@ -17,7 +21,7 @@ def _get_vault_from_arn(arn, settings):
 def upload(arn, output_file, settings):
 	vault = _get_vault_from_arn(arn, settings)
 	id = vault.upload_archive(output_file)
-	
+
 	# record backup internally
 	# we don't need this record in order to restore from backup (obviously!)
 	# but it makes pruning the backup set easier, and amazon reccomends it
