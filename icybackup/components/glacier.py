@@ -1,3 +1,4 @@
+import logging
 from .. import models
 from datetime import timedelta, datetime
 from boto.glacier.layer2 import Layer2 as Glacier
@@ -5,13 +6,18 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.core.management import CommandError
 
+logger = logging.getLogger(__name__)
+
 # upload to amazon glacier
 
 def _get_vault_from_arn(arn, settings):
-    if hasattr(settings, 'USING_IAM_ROLE') and settings.USING_IAM_ROLE:
-        g = Glacier()
-    else:
-    	g = Glacier(aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+	logger.info('getting vault from arn')
+	if hasattr(settings, 'USING_IAM_ROLE') and settings.USING_IAM_ROLE:
+		# GLACIER_REGION_NAME is required when USING_IAM_ROLE is True
+		g = Glacier(region_name=settings.GLACIER_REGION_NAME)
+	else:
+		g = Glacier(aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+	logger.info('Glacier: {}'.format(g.__dict__))
 	for i in g.list_vaults():
 		if arn == i.arn:
 			return i
