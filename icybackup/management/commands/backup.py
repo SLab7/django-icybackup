@@ -77,8 +77,11 @@ class Command(BaseCommand):
 
 		# upload to glacier
 		if glacier_vault is not None:
+			print('uploading to glacier')
 			glacier.upload(glacier_vault, output_file, settings)
+			print('reconciling glacier')
 			glacier.reconcile(glacier_vault, settings)
+			print('prune glacier')
 			glacier.prune(glacier_vault, settings)
 
 		# output to stdout
@@ -87,9 +90,11 @@ class Command(BaseCommand):
 				sys.stdout.write(f.read())
 
 		# clean up
+		print('clean up')
 		shutil.rmtree(backup_root, ignore_errors=True)
 		if output_file_temporary:
 			os.unlink(output_file)
+		print("DONE")
 
 def _time():
 	return time.strftime('%Y%m%d-%H%M%S')

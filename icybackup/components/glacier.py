@@ -20,6 +20,7 @@ def _get_vault_from_arn(arn, settings):
 	logger.info('Glacier: {}'.format(g.__dict__))
 	for i in g.list_vaults():
 		if arn == i.arn:
+			print(i.arn)
 			return i
 	else:
 		raise CommandError('The specified vault could not be accessed.')
@@ -27,6 +28,7 @@ def _get_vault_from_arn(arn, settings):
 def upload(arn, output_file, settings):
 	vault = _get_vault_from_arn(arn, settings)
 	id = vault.upload_archive(output_file)
+	print(id)
 
 	# record backup internally
 	# we don't need this record in order to restore from backup (obviously!)
@@ -67,13 +69,22 @@ def _do_reconcile(inventory):
 			models.GlacierBackup.objects.create(glacier_id=id, date=creation_date).save()
 
 def prune(arn, settings):
+	"""
+	keeps all backups made within the last 31 days,
+	keeps daily backup from 90 days to 31 days,
+	keeps weekly backup within the past year,
+	keeps monthly backups for all time
+	"""
 	vault = _get_vault_from_arn(arn, settings)
 	keep_all_before = datetime.now() - timedelta(days=31)
 	keep_daily_before = datetime.now() - timedelta(days=90)
 	keep_weekly_before = datetime.now() - timedelta(days=365)
 	oldest_date = models.GlacierBackup.objects.all().order_by('date')[0].date
-	_do_delete(vault, 1, keep_all_before, keep_daily_before)
-	_do_delete(vault, 30, keep_daily_before, keep_weekly_before)
+	if keep_all_before >= oldest_date:
+		_do_delete(vault, 1, keep_all_before, keep_daily_before)
+	if keep_daily_before >= oldest_date:
+		_do_delete(vault, 7, keep_daily_before, keep_weekly_before)
+	if keep_weekly_before >= oldest_date:
 	_do_delete(vault, 30, keep_weekly_before, oldest_date)
 
 def _do_delete(vault, day_count, from_date, to_date):
@@ -82,9 +93,11 @@ def _do_delete(vault, day_count, from_date, to_date):
 		end_date = begin_date - timedelta(days=day_count)
 		if end_date < to_date:
 			end_date = to_date
-		qs = models.GlacierBackup.objects.filter(date__lt=end_date, date__gte=begin_date)
-		# delete all but the most recent
+		print('filter per {} day/s from {} to {}'.format(day_count, begin_date, end_date))
+		qs = models.GlacierBackup.objects.filter(date__lt=begin_date, date__gte=end_date)
+		delete all but the most recent
 		for record in qs[1:]:
 			print "Deleting", record.glacier_id
 			vault.delete(record.glacier_id)
 			record.delete()
+		begin_date = begin_date - timedelta(days=day_count)
