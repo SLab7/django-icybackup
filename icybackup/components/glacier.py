@@ -1,4 +1,5 @@
 import logging
+import pytz
 from .. import models
 from datetime import timedelta, datetime
 from boto.glacier.layer2 import Layer2 as Glacier
@@ -76,15 +77,15 @@ def prune(arn, settings):
 	keeps monthly backups for all time
 	"""
 	vault = _get_vault_from_arn(arn, settings)
-	keep_all_before = datetime.now() - timedelta(days=31)
-	keep_daily_before = datetime.now() - timedelta(days=90)
-	keep_weekly_before = datetime.now() - timedelta(days=365)
+	keep_all_before = datetime.now(pytz.utc) - timedelta(days=31)
+	keep_daily_before = datetime.now(pytz.utc) - timedelta(days=90)
+	keep_weekly_before = datetime.now(pytz.utc) - timedelta(days=365)
 	oldest_date = models.GlacierBackup.objects.all().order_by('date')[0].date
-	if keep_all_before.date >= oldest_date:
+	if keep_all_before >= oldest_date:
 		_do_delete(vault, 1, keep_all_before, keep_daily_before)
-	if keep_daily_before.date >= oldest_date:
+	if keep_daily_before >= oldest_date:
 		_do_delete(vault, 7, keep_daily_before, keep_weekly_before)
-	if keep_weekly_before.date >= oldest_date:
+	if keep_weekly_before >= oldest_date:
 		_do_delete(vault, 30, keep_weekly_before, oldest_date)
 
 def _do_delete(vault, day_count, from_date, to_date):
