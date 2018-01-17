@@ -85,7 +85,7 @@ def prune(arn, settings):
 	if keep_daily_before >= oldest_date:
 		_do_delete(vault, 7, keep_daily_before, keep_weekly_before)
 	if keep_weekly_before >= oldest_date:
-	_do_delete(vault, 30, keep_weekly_before, oldest_date)
+		_do_delete(vault, 30, keep_weekly_before, oldest_date)
 
 def _do_delete(vault, day_count, from_date, to_date):
 	begin_date = from_date
