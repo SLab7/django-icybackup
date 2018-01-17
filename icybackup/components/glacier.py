@@ -95,7 +95,7 @@ def _do_delete(vault, day_count, from_date, to_date):
 			end_date = to_date
 		print('filter per {} day/s from {} to {}'.format(day_count, begin_date, end_date))
 		qs = models.GlacierBackup.objects.filter(date__lt=begin_date, date__gte=end_date)
-		delete all but the most recent
+		# delete all but the most recent
 		for record in qs[1:]:
 			print "Deleting", record.glacier_id
 			vault.delete(record.glacier_id)
