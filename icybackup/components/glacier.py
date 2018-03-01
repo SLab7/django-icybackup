@@ -99,6 +99,6 @@ def _do_delete(vault, day_count, from_date, to_date):
 		# delete all but the most recent
 		for record in qs[1:]:
 			print "Deleting", record.glacier_id
-			vault.delete(record.glacier_id)
+			vault.delete_archive(record.glacier_id)
 			record.delete()
 		begin_date = begin_date - timedelta(days=day_count)
