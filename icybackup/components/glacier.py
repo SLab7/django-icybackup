@@ -102,6 +102,7 @@ def _do_delete(vault, day_count, from_date, to_date):
 			try:
 				vault.delete_archive(record.glacier_id)
 				record.delete()
-			except:
+			except Exception as e:
+				print(e)
 				pass
 		begin_date = begin_date - timedelta(days=day_count)
