@@ -72,20 +72,16 @@ def _do_reconcile(inventory):
 
 def prune(arn, settings):
 	"""
-	keeps all backups made within the last 31 days,
-	keeps daily backup from 90 days to 31 days,
+	keeps all backups made within the last 90 days
 	keeps weekly backup within the past year,
 	keeps monthly backups for all time
 	"""
 	vault = _get_vault_from_arn(arn, settings)
-	keep_all_before = datetime.now(pytz.utc) - timedelta(days=31)
-	keep_daily_before = datetime.now(pytz.utc) - timedelta(days=90)
+	keep_all_before = datetime.now(pytz.utc) - timedelta(days=90)
 	keep_weekly_before = datetime.now(pytz.utc) - timedelta(days=365)
 	oldest_date = models.GlacierBackup.objects.all().order_by('date')[0].date
 	if keep_all_before >= oldest_date:
-		_do_delete(vault, 1, keep_all_before, keep_daily_before)
-	if keep_daily_before >= oldest_date:
-		_do_delete(vault, 7, keep_daily_before, keep_weekly_before)
+		_do_delete(vault, 7, keep_all_before, keep_weekly_before)
 	if keep_weekly_before >= oldest_date:
 		_do_delete(vault, 30, keep_weekly_before, oldest_date)
 
