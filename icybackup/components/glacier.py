@@ -1,5 +1,6 @@
 import logging
 import pytz
+import time
 from .. import models
 from datetime import timedelta, datetime
 from boto.glacier.layer2 import Layer2 as Glacier
@@ -106,3 +107,26 @@ def _do_delete(vault, day_count, from_date, to_date):
 				print(e)
 				pass
 		begin_date = begin_date - timedelta(days=day_count)
+
+
+def retrieve_latest(arn, settings, filename, wait_mode=False):
+	vault = _get_vault_from_arn(arn, settings)
+	latest_backup = models.GlacierBackup.objects.all().order_by('-date')[0]
+	archive_id = latest_backup.glacier_id
+	job = vault.retrieve_archive(archive_id)
+
+    # checking manually if job is completed every 10 seconds instead of using Amazon SNS
+    if wait_mode:
+        while 1:
+            job = vault.get_job(job_id)
+            if not job.completed:
+                time.sleep(10)
+            else:
+                break
+
+    if job.completed:
+        print("Downloading archive {}...".format(archive_id))
+        print("Backup date: {}".format(latest_backup.date))
+        job.download_to_file(filename)
+    else:
+        print "Not completed yet"
