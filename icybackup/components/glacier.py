@@ -109,7 +109,11 @@ def retrieve_latest(arn, settings, filename, wait_mode=False):
 	vault = _get_vault_from_arn(arn, settings)
 	latest_backup = models.GlacierBackup.objects.all().order_by('-date')[0]
 	archive_id = latest_backup.glacier_id
-	job = vault.retrieve_archive(archive_id)
+	try:
+		job = vault.retrieve_archive(archive_id)
+	except Exception as e:
+		print(e)
+		raise(e)
 
 	if wait_mode:
 		while 1:
