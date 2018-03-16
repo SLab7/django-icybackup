@@ -115,18 +115,16 @@ def retrieve_latest(arn, settings, filename, wait_mode=False):
 	archive_id = latest_backup.glacier_id
 	job = vault.retrieve_archive(archive_id)
 
-    # checking manually if job is completed every 10 seconds instead of using Amazon SNS
-    if wait_mode:
-        while 1:
-            job = vault.get_job(job_id)
-            if not job.completed:
-                time.sleep(10)
-            else:
-                break
+	if wait_mode:
+		while 1:
+			if not job.completed:
+				time.sleep(10)
+			else:
+				break
 
-    if job.completed:
-        print("Downloading archive {}...".format(archive_id))
-        print("Backup date: {}".format(latest_backup.date))
-        job.download_to_file(filename)
-    else:
-        print "Not completed yet"
+	if job.completed:
+		print("Downloading archive {}...".format(archive_id))
+		print("Backup date: {}".format(latest_backup.date))
+		job.download_to_file(filename)
+	else:
+		print "Not completed yet"
