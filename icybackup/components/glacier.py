@@ -110,12 +110,18 @@ def retrieve_latest(arn, settings, filename, wait_mode=False):
 	latest_backup = models.GlacierBackup.objects.all().order_by('-date')[0]
 	archive_id = latest_backup.glacier_id
 
-	# check if there is a current arhive retrieval job for that archive id
+	# check if there is a current archive retrieval job for that archive id
 	jobs = vault.list_jobs()
 	for job in jobs:
 		if job.archive_id == archive_id and job.action == "ArchiveRetrieval":
 			print("Job with archive id {} found".format(archive_id))
-			break
+			if job.completed:
+				print("Downloading archive {}...".format(archive_id))
+				print("Backup date: {}".format(latest_backup.date))
+				job.download_to_file(filename)
+				break
+			else:
+				print "Not completed yet"
 	else:
 		print("No job matching arhive id found, retrieving archive")
 		try:
@@ -124,16 +130,9 @@ def retrieve_latest(arn, settings, filename, wait_mode=False):
 			print(e)
 			raise(e)
 
-	if wait_mode:
-		while 1:
-			if not job.completed:
-				time.sleep(10)
-			else:
-				break
-
-	if job.completed:
-		print("Downloading archive {}...".format(archive_id))
-		print("Backup date: {}".format(latest_backup.date))
-		job.download_to_file(filename)
-	else:
-		print "Not completed yet"
+		if wait_mode:
+			while 1:
+				if not job.completed:
+					time.sleep(10)
+				else:
+					break
