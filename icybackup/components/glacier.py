@@ -46,7 +46,11 @@ def reconcile(arn, settings):
 	to_be_collected = models.GlacierInventory.objects.filter(collected_date=None)
 	if len(to_be_collected) > 0:
 		for record in to_be_collected:
-			job = vault.get_job(record.inventory_id)
+			try:
+				job = vault.get_job(record.inventory_id)
+			except Exception as e:
+				print("Error getting job: {}".format(e))
+				continue
 			if job.completed:
 				print "Reconciling inventory", record.inventory_id
 				_do_reconcile(job.get_output())
