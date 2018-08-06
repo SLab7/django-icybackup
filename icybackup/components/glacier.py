@@ -52,7 +52,7 @@ def reconcile(arn, settings):
 				print("Error getting job: {}".format(e))
 				continue
 			if job.completed:
-				print "Reconciling inventory", record.inventory_id
+				print("Reconciling inventory {}".format(record.inventory_id))
 				_do_reconcile(job.get_output())
 				record.collected_date = datetime.now()
 				record.save()
@@ -99,7 +99,7 @@ def _do_delete(vault, day_count, from_date, to_date):
 		qs = models.GlacierBackup.objects.filter(date__lt=begin_date, date__gte=end_date)
 		# delete all but the most recent
 		for record in qs[1:]:
-			print "Deleting", record.glacier_id
+			print("Deleting {}".format(record.glacier_id))
 			try:
 				vault.delete_archive(record.glacier_id)
 				record.delete()
@@ -125,7 +125,7 @@ def retrieve_latest(arn, settings, filename, wait_mode=False):
 				job.download_to_file(filename)
 				break
 			else:
-				print "Not completed yet"
+				print("Not completed yet")
 	else:
 		print("No job matching arhive id found, retrieving archive")
 		try:

@@ -12,19 +12,20 @@ from ...components import db, glacier
 # Based on: http://www.yashh.com/blog/2008/sep/05/django-database-backup-view/
 # set default for outdir as BACKUPS_PATH in settings
 class Command(BaseCommand):
-	option_list = BaseCommand.option_list + (
-		make_option('-o', '--output', default=None, dest='output',
-			help='Write backup to file'),
-		make_option('-d', '--outdir', default=settings.BACKUPS_PATH, dest='outdir',
-			help='Write backup to timestamped file in a directory'),
-		make_option('-g', '--glacier', default=None, dest='glacier',
-			help='Upload backup to the Amazon Glacier vault with the given ARN'),
-		make_option('-O', '--stdoutput', action='store_true', dest='stdoutput',
-			help='Output backup tarball to standard output'),
-		make_option('--extra', '-e', action='append', default=[], dest='extras',
-			help='Include extra directories or files in the backup tarball'),
-	)
 	help = "Back up a Django installation (database and media directory)."
+
+	def add_arguments(self, parser):
+		parser.add_argument('-o', '--output', default=None, dest='output',
+							help='Write backup to file')
+		parser.add_argument('-d', '--outdir', default=settings.BACKUPS_PATH,
+							dest='outdir',
+							help='Write backup to timestamped file in a directory')
+		parser.add_argument('-g', '--glacier', default=None, dest='glacier',
+							help='Upload backup to the Amazon Glacier vault with the given ARN')
+		parser.add_argument('-O', '--stdoutput', action='store_true',
+							dest='stdoutput', help='Output backup tarball to standard output')
+		parser.add_argument('--extra', '-e', action='append', default=[],
+							dest='extras', help='Include extra directories or files in the backup tarball')
 
 	def handle(self, *args, **options):
 		extras = options.get('extras')

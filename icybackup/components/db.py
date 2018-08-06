@@ -31,11 +31,11 @@ def _database_dict_from_settings(settings):
 	return database_list
 
 def backup_to(settings, dir, **kwargs):
-	for name, database in _database_dict_from_settings(settings).iteritems():
+	for name, database in _database_dict_from_settings(settings).items():
 		do(BACKUP, database, os.path.join(dir, name), **kwargs)
 
 def restore_from(settings, dir, **kwargs):
-	for name, database in _database_dict_from_settings(settings).iteritems():
+	for name, database in _database_dict_from_settings(settings).items():
 		do(RESTORE, database, os.path.join(dir, name), **kwargs)
 
 def do(action, database, f, **kwargs):
