@@ -16,16 +16,15 @@ class Command(BaseCommand):
 
 	def add_arguments(self, parser):
 		parser.add_argument('-o', '--output', default=None, dest='output',
-							help='Write backup to file')
+			help='Write backup to file')
 		parser.add_argument('-d', '--outdir', default=settings.BACKUPS_PATH,
-							dest='outdir',
-							help='Write backup to timestamped file in a directory')
+			dest='outdir', help='Write backup to timestamped file in a directory')
 		parser.add_argument('-g', '--glacier', default=None, dest='glacier',
-							help='Upload backup to the Amazon Glacier vault with the given ARN')
+			help='Upload backup to the Amazon Glacier vault with the given ARN')
 		parser.add_argument('-O', '--stdoutput', action='store_true',
-							dest='stdoutput', help='Output backup tarball to standard output')
+			dest='stdoutput', help='Output backup tarball to standard output')
 		parser.add_argument('--extra', '-e', action='append', default=[],
-							dest='extras', help='Include extra directories or files in the backup tarball')
+			dest='extras', help='Include extra directories or files in the backup tarball')
 
 	def handle(self, *args, **options):
 		extras = options.get('extras')
